@@ -1,0 +1,10 @@
+domain: news.sina.com.cn
+dispatch:
+  class: com.jspider.dispatch.news.DispatchNews
+download:
+  class: com.jspider.download.news.DownloadNews
+extract:
+  class: com.jspider.extract.news.ExtractNews
+  title: [支持正则，支持jsoup，支持xpath]
+dup:
+  com.jspider.dup.news

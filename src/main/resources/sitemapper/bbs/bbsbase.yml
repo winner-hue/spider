@@ -1,0 +1,9 @@
+download:
+  class: com.pj.spider.plugin
+extract:
+  class: com.spider.extract.bbs.ExtractBbs
+  title: [支持正则，支持jsoup，支持xpath]
+dup:
+  class: com.spider.dup.bbs
+storage:
+  class: com.spider.storage

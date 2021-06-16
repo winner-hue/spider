@@ -1,0 +1,10 @@
+domain: csdn.net
+dispatch:
+  class: com.jspider.dispatch.blog.DispatchBlog
+download:
+  class: com.jspider.download.blog.DownloadBlog
+extract:
+  class: com.jspider.extract.blog.ExtractBlog
+  title: [支持正则，支持jsoup，支持xpath]
+dup:
+  com.jspider.extract.blog

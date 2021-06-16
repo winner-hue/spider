@@ -1,0 +1,12 @@
+download:
+  class: com.pj.spider.plugin.DownloadBase
+  proxy_host: httpproxy.cloud
+  proxy_port: 37861
+
+extract:
+  class: com.pj.spider.plugin.ExtractBase
+  title: [支持正则，支持jsoup，支持xpath]
+dup:
+  class: com.pj.spider.plugin.DupBase
+storage:
+  class: com.pj.spider.plugin.StorageBase

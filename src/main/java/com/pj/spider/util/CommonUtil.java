@@ -1,11 +1,12 @@
 package com.pj.spider.util;
 
 import com.pj.spider.config.CommonConfig;
-import com.pj.spider.download.DownloadBase;
-import com.pj.spider.plugin.DupBase;
 import com.pj.spider.entity.Task;
+import com.pj.spider.plugin.DownloadBase;
+import com.pj.spider.plugin.DupBase;
 import com.pj.spider.plugin.ExtractBase;
 import com.pj.spider.plugin.StorageBase;
+import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -21,6 +22,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class CommonUtil {
     static {
         try {
@@ -67,10 +69,17 @@ public class CommonUtil {
                     try {
                         InputStream resourceAsStream = CommonUtil.class.getClassLoader().getResourceAsStream("sitemapper/" + value + File.separator + name);
                         HashMap hashMap = yaml.loadAs(resourceAsStream, HashMap.class);
-                        String domain = (String) hashMap.get("domain");
+                        String domain = "base";
+                        if (hashMap.get("domain") == null) {
+                            if (!name.contains("base")) {
+                                log.info(name + "文件配置错误");
+                            }
+                        } else {
+                            domain = (String) hashMap.get("domain");
+                        }
                         String key = value + "_" + domain;
                         CommonConfig.mapper.putIfAbsent(key, hashMap);
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
                     }
                 }
             }
@@ -133,22 +142,24 @@ public class CommonUtil {
                     HashMap hashMap = CommonConfig.mapper.get(value + "_" + secondDomain) != null ? CommonConfig.mapper.get(value + "_" + secondDomain) : CommonConfig.mapper.get(value + "_" + mainDomain);
                     if (hashMap != null) {
                         String class_path = (String) ((HashMap) hashMap.get(name)).get("class");
-                        return new Object[]{Class.forName(class_path).getDeclaredConstructor(Task.class).newInstance(task), (HashMap) hashMap.get("name")};
+                        return new Object[]{Class.forName(class_path).getDeclaredConstructor(Task.class).newInstance(task), (HashMap) hashMap.get(name)};
                     }
                 }
             }
 
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
+        String value = CommonConfig.properties.get(taskType);
+        HashMap hashMap = CommonConfig.mapper.get(value + "_" + "base");
         switch (name) {
             case "download":
-                return new Object[]{new DownloadBase(task)};
+                return new Object[]{new DownloadBase(task), (HashMap) hashMap.get(name)};
             case "dup":
-                return new Object[]{new DupBase(task)};
+                return new Object[]{new DupBase(task), (HashMap) hashMap.get(name)};
             case "extract":
-                return new Object[]{new ExtractBase(task)};
+                return new Object[]{new ExtractBase(task), (HashMap) hashMap.get(name)};
             case "storage":
-                return new Object[]{new StorageBase(task)};
+                return new Object[]{new StorageBase(task), (HashMap) hashMap.get(name)};
             default:
                 return null;
         }

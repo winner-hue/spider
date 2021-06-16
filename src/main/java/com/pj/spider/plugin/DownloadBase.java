@@ -140,6 +140,7 @@ public class DownloadBase extends Spider {
             int code = execute.code();
             responseData.setPageSource(pageSource);
             responseData.setDownloadStatusCode(code);
+            client.connectionPool().evictAll();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -156,6 +157,7 @@ public class DownloadBase extends Spider {
             int code = execute.code();
             responseData.setPageSource(pageSource);
             responseData.setDownloadStatusCode(code);
+            client.connectionPool().evictAll();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -172,6 +174,7 @@ public class DownloadBase extends Spider {
             int code = execute.code();
             responseData.setPageSource(pageSource);
             responseData.setDownloadStatusCode(code);
+            client.connectionPool().evictAll();
         } catch (IOException e) {
             e.printStackTrace();
         }

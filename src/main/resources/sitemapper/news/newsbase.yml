@@ -1,10 +1,10 @@
 download:
   class: com.pj.spider.plugin.DownloadBase
-  proxy_host: httpproxy.cloud
-  proxy_port: 37861
+  proxy_host: 127.0.0.1
+  proxy_port: 7798
   is_change_ua: 1
 #  proxy_url: http://127.0.0.1:8080/proxy
-  headers: Content-Type=application/x-www-form-urlencoded
+  headers: Content-Type=application/x-www-form-urlencoded##referer=https://lihkg.com/category/1
 extract:
   class: com.pj.spider.plugin.ExtractBase
   title: [支持正则，支持jsoup，支持xpath]

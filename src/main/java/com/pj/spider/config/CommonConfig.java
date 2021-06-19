@@ -1,6 +1,5 @@
 package com.pj.spider.config;
 
-import com.pj.spider.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +20,7 @@ public class CommonConfig {
     public static Integer connectionPool;
     public static Integer connectionSocket;
     public static Long keepAlive;
+    public static Integer esHeapBuffered;
 
     @Value("${site.mapper.cell}")
     public void setSiteMapperCell(String siteMapperCell) {

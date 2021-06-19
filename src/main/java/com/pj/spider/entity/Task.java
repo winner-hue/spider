@@ -37,4 +37,11 @@ public class Task {
     private Set<Task> taskListNum; // 列表任务数
     private Set<Task> taskDetailNum; //详情任务数
     private Integer isRun; //列表任务或者详情任务是否运行过，用于排掉重复任务,0表示运行过，1表示未运行
+
+    /**
+     * 以下字段运行过程中生成使用
+     */
+    private String pageSource;  // 网页页面源码
+    private BaseStruct structData; // 生成的结构化数据
+    private UrlStructData urlStructData; // 子任务携带的列表页的解析数据，供详情页面解析使用
 }

@@ -3,12 +3,30 @@ download:
   proxy_host: 127.0.0.1
   proxy_port: 7798
   is_change_ua: 1
-#  proxy_url: http://127.0.0.1:8080/proxy
+  #  proxy_url: http://127.0.0.1:8080/proxy
   headers: Content-Type=application/x-www-form-urlencoded##referer=https://lihkg.com/category/1
 extract:
   class: com.pj.spider.plugin.ExtractBase
-  title: [支持正则，支持jsoup，支持xpath]
+  #  列表匹配
+  listNode:
+  listMatch:
+  listTitle:
+  listAuthor:
+  listPostTime:
+  listSource:
+  detailUrl:
+  listUrls:
+  #  正文匹配
+  detailMatch: details/\d+
+  detailNode:
+  detailTitle: .//h1[@class='title-article']
+  detailContent: .//div[@id='content_views']
+  detailAuthor: .//a[@class='follow-nickName ']
+  detailPostTime: .//div[@class='bar-content']/span[@class='time']
+  detailSource:
+  isUseListData:
 dup:
   class: com.pj.spider.plugin.DupBase
+  dupField: title, content
 storage:
   class: com.pj.spider.plugin.StorageBase

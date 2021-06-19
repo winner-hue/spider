@@ -78,7 +78,7 @@ public class CommonUtil {
                             domain = (String) hashMap.get("domain");
                         }
                         String key = value + "_" + domain;
-                        CommonConfig.mapper.putIfAbsent(key, hashMap);
+                        CommonConfig.mapper.put(key, hashMap);
                     } catch (Exception ignored) {
                     }
                 }
@@ -163,5 +163,24 @@ public class CommonUtil {
             default:
                 return null;
         }
+    }
+
+    public static boolean isMatch(String pattern, String content) {
+        Matcher m = Pattern.compile(pattern).matcher(content);
+        return m.find();
+    }
+
+    public static String[] match(String pattern, String content) {
+        Matcher m = Pattern.compile(pattern).matcher(content);
+
+        while (m.find()) {
+            int n = m.groupCount();
+            String[] ss = new String[n + 1];
+            for (int i = 0; i <= n; i++) {
+                ss[i] = m.group(i);
+            }
+            return ss;
+        }
+        return null;
     }
 }

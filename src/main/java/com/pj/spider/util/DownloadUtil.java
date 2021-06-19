@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 用于内部服务下载
+ */
 public class DownloadUtil {
     private static OkHttpClient.Builder builder;
     private static OkHttpClient client;

@@ -18,11 +18,20 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 下载类基类
+ */
 public class DownloadBase extends Spider {
     public DownloadBase(Task task) {
         super(task);
     }
 
+    /**
+     * 处理任务
+     *
+     * @param map
+     * @return
+     */
     public ResponseData processTask(HashMap map) {
         ResponseData responseData = new ResponseData();
         responseData.setStatusCode(200);
@@ -30,7 +39,13 @@ public class DownloadBase extends Spider {
         return responseData;
     }
 
-    public void download(ResponseData responseData, HashMap map) {
+    /**
+     * 判断配置文件代理，请求头等参数，选择不同的下载函数
+     *
+     * @param responseData
+     * @param map
+     */
+    protected void download(ResponseData responseData, HashMap map) {
         Object proxy_host = map.get("proxy_host");
         Object proxy_port = map.get("proxy_port");
         Object proxy_user = map.get("proxy_user");
@@ -69,7 +84,16 @@ public class DownloadBase extends Spider {
         }
     }
 
-    public OkHttpClient initClient(String proxy_host, String proxy_port, String proxy_user, String proxy_pwd) {
+    /**
+     * 根据不同的参数，初始化client
+     *
+     * @param proxy_host
+     * @param proxy_port
+     * @param proxy_user
+     * @param proxy_pwd
+     * @return
+     */
+    protected OkHttpClient initClient(String proxy_host, String proxy_port, String proxy_user, String proxy_pwd) {
         if (proxy_user != null) {
             return new OkHttpClient.Builder()
                     .connectTimeout(CommonConfig.connectionSocket, TimeUnit.SECONDS)
@@ -102,7 +126,14 @@ public class DownloadBase extends Spider {
 
     }
 
-    public Request initRequest(String userAgent, String headers) {
+    /**
+     * 根据不同的参数，初始化请求
+     *
+     * @param userAgent
+     * @param headers
+     * @return
+     */
+    protected Request initRequest(String userAgent, String headers) {
         Headers.Builder builder = new Headers.Builder();
         builder.add("User-Agent", userAgent);
         String[] split = headers.split("##");
@@ -130,8 +161,27 @@ public class DownloadBase extends Spider {
         }
     }
 
-    public void download(ResponseData responseData, String userAgent, String headers) {
+    /**
+     * 无代理下载方法
+     *
+     * @param responseData
+     * @param userAgent
+     * @param headers
+     */
+    protected void download(ResponseData responseData, String userAgent, String headers) {
         OkHttpClient client = initClient(null, null, null, null);
+        getPageSource(responseData, userAgent, headers, client);
+    }
+
+    /**
+     * 获取网站源码
+     *
+     * @param responseData
+     * @param userAgent
+     * @param headers
+     * @param client
+     */
+    private void getPageSource(ResponseData responseData, String userAgent, String headers, OkHttpClient client) {
         Request request = initRequest(userAgent, headers);
         Call call = client.newCall(request);
         try {
@@ -146,42 +196,51 @@ public class DownloadBase extends Spider {
         }
     }
 
-    public void download(ResponseData responseData, String userAgent, String headers,
-                         String proxy_host, String proxy_port, String proxy_user, String proxy_pwd) {
+    /**
+     * 有账号密码代理下载方法
+     *
+     * @param responseData
+     * @param userAgent
+     * @param headers
+     * @param proxy_host
+     * @param proxy_port
+     * @param proxy_user
+     * @param proxy_pwd
+     */
+    protected void download(ResponseData responseData, String userAgent, String headers,
+                            String proxy_host, String proxy_port, String proxy_user, String proxy_pwd) {
         OkHttpClient client = initClient(proxy_host, proxy_port, proxy_user, proxy_pwd);
-        Request request = initRequest(userAgent, headers);
-        Call call = client.newCall(request);
-        try {
-            Response execute = call.execute();
-            String pageSource = Objects.requireNonNull(execute.body()).string();
-            int code = execute.code();
-            responseData.setPageSource(pageSource);
-            responseData.setDownloadStatusCode(code);
-            client.connectionPool().evictAll();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        getPageSource(responseData, userAgent, headers, client);
     }
 
-    public void download(ResponseData responseData, String userAgent, String headers,
-                         String proxy_host, String proxy_port) {
+    /**
+     * 有代理，无账号密码验证下载方法
+     *
+     * @param responseData
+     * @param userAgent
+     * @param headers
+     * @param proxy_host
+     * @param proxy_port
+     */
+    protected void download(ResponseData responseData, String userAgent, String headers,
+                            String proxy_host, String proxy_port) {
         OkHttpClient client = initClient(proxy_host, proxy_port, null, null);
-        Request request = initRequest(userAgent, headers);
-        Call call = client.newCall(request);
-        try {
-            Response execute = call.execute();
-            String pageSource = Objects.requireNonNull(execute.body()).string();
-            int code = execute.code();
-            responseData.setPageSource(pageSource);
-            responseData.setDownloadStatusCode(code);
-            client.connectionPool().evictAll();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        getPageSource(responseData, userAgent, headers, client);
     }
 
-    public void doDownload(ResponseData responseData, String userAgent, String headers,
-                           Object proxy_host, Object proxy_port, Object proxy_user, Object proxy_pwd) {
+    /**
+     * 执行下载
+     *
+     * @param responseData
+     * @param userAgent
+     * @param headers
+     * @param proxy_host
+     * @param proxy_port
+     * @param proxy_user
+     * @param proxy_pwd
+     */
+    protected void doDownload(ResponseData responseData, String userAgent, String headers,
+                              Object proxy_host, Object proxy_port, Object proxy_user, Object proxy_pwd) {
         if (proxy_user == null) {
             download(responseData, userAgent, headers,
                     (String) proxy_host, String.valueOf(proxy_port));

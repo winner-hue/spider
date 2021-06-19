@@ -8,8 +8,4 @@ public abstract class Spider {
     public Spider(Task task) {
         this.task = task;
     }
-
-    public void process() {
-
-    }
 }

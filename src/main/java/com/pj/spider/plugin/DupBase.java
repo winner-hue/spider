@@ -36,15 +36,19 @@ public class DupBase extends Spider {
                         Object object = declaredField.get(tempData);
                         builder.append(String.valueOf(object));
                     }
-                    String md5 = CommonUtil.getMd5(builder.toString());
-                    String s = stringRedisTemplate.opsForValue().get(md5);
-                    if (s != null) {
+                    if (builder.toString().equals("")) {
                         dup.setDup(false);
                     } else {
-                        dup.setDup(true);
-                        stringRedisTemplate.opsForValue().set(md5, "1");
+                        String md5 = CommonUtil.getMd5(builder.toString());
+                        String s = stringRedisTemplate.opsForValue().get(md5);
+                        if (s != null) {
+                            dup.setDup(false);
+                        } else {
+                            dup.setDup(true);
+                            stringRedisTemplate.opsForValue().set(md5, "1");
+                        }
+                        dup.setMd5(md5);
                     }
-                    dup.setMd5(md5);
                     dupResponses.add(dup);
                 } catch (Exception ignore) {
                 }

@@ -35,7 +35,12 @@ public class DownloadBase extends Spider {
     public ResponseData processTask(HashMap map) {
         ResponseData responseData = new ResponseData();
         responseData.setStatusCode(200);
-        download(responseData, map);
+        for (int i = 0; i < CommonConfig.downloadRetryTimes; i++) {
+            download(responseData, map);
+            if (responseData.getPageSource() != null) {
+                break;
+            }
+        }
         return responseData;
     }
 
@@ -221,11 +226,13 @@ public class DownloadBase extends Spider {
      * @param headers
      * @param proxy_host
      * @param proxy_port
+     * @return
      */
-    protected void download(ResponseData responseData, String userAgent, String headers,
-                            String proxy_host, String proxy_port) {
+    protected String download(ResponseData responseData, String userAgent, String headers,
+                              String proxy_host, String proxy_port) {
         OkHttpClient client = initClient(proxy_host, proxy_port, null, null);
         getPageSource(responseData, userAgent, headers, client);
+        return userAgent;
     }
 
     /**
@@ -249,5 +256,4 @@ public class DownloadBase extends Spider {
                     (String) proxy_host, String.valueOf(proxy_port), (String) proxy_user, (String) proxy_pwd);
         }
     }
-
 }

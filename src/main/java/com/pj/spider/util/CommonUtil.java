@@ -1,5 +1,7 @@
 package com.pj.spider.util;
 
+import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.pj.spider.config.CommonConfig;
 import com.pj.spider.entity.Task;
 import com.pj.spider.plugin.DownloadBase;
@@ -11,14 +13,20 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Objects;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -84,6 +92,7 @@ public class CommonUtil {
                 }
             }
         } catch (Exception e) {
+            System.out.println("加载配置文件错误， 退出系统。。。");
             System.exit(1);
         }
     }
@@ -182,5 +191,99 @@ public class CommonUtil {
             return ss;
         }
         return null;
+    }
+
+
+    public static <T> String getInsertSql(String tablename, Class<T> clazz, T t) {
+        //insert into table_name (column_name1,column_name2, ...) values (value1,value2, ...)
+        String sql = "";
+        Field[] fields = ReflectUtil.getFieldsDirectly(clazz, false);
+        StringBuffer topHalf = new StringBuffer("insert into " + tablename + " (");
+        StringBuffer afterAalf = new StringBuffer("values (");
+        for (Field field : fields) {
+            if ("ID".equals(field.getName()) || "id".equals(field.getName())) {
+                continue;   //id 自动生成无需手动插入
+            }
+            topHalf.append(field.getName()).append(",");
+            if (ReflectUtil.getFieldValue(t, field.getName()) instanceof String) {
+                afterAalf.append("'").append(ReflectUtil.getFieldValue(t, field.getName())).append("',");
+            } else {
+                afterAalf.append(ReflectUtil.getFieldValue(t, field.getName())).append(",");
+            }
+        }
+        topHalf = new StringBuffer(StrUtil.removeSuffix(topHalf.toString(), ","));
+        afterAalf = new StringBuffer(StrUtil.removeSuffix(afterAalf.toString(), ","));
+        topHalf.append(") ");
+        afterAalf.append(") ");
+        sql = topHalf.toString() + afterAalf.toString();
+        return sql;
+    }
+
+    /**
+     * 生成更新语句
+     * 必须含有id
+     * 数据实体中 null 与 空字段不参与更新
+     *
+     * @param tablename 数据库中的表明
+     * @param clazz     与数据库中字段一一对应的类
+     * @param t         有数据的实体
+     * @param <T>       数据实体类型,如 User
+     */
+    public static <T> String getUpdateSql(String tablename, Class<T> clazz, T t) {
+        StringBuilder sql = new StringBuilder();
+        String id = ""; //保存id名：ID or id
+        Field[] fields = ReflectUtil.getFieldsDirectly(clazz, false);
+        sql = new StringBuilder("update " + tablename + " set ");
+        for (Field field : fields) {
+            StringBuilder tmp = new StringBuilder();
+            if ("ID".equals(field.getName()) || "id".equals(field.getName())) {
+                id = field.getName();
+                continue;//更新的时候无需set id=xxx
+            }
+            if (ReflectUtil.getFieldValue(t, field.getName()) != null && ReflectUtil.getFieldValue(t, field.getName()) != "") {
+                tmp.append(field.getName()).append("=");
+                if (ReflectUtil.getFieldValue(t, field.getName()) instanceof String) {
+                    tmp.append("'").append(ReflectUtil.getFieldValue(t, field.getName())).append("',");
+                } else if (ReflectUtil.getFieldValue(t, field.getName()) instanceof LocalDateTime) {
+                    String replace = ReflectUtil.getFieldValue(t, field.getName()).toString().replace("T", " ");
+                    tmp.append("'").append(replace).append("',");
+                } else {
+                    tmp.append(ReflectUtil.getFieldValue(t, field.getName())).append(",");
+                }
+                sql.append(tmp);
+            }
+        }
+        sql = new StringBuilder(StrUtil.removeSuffix(sql.toString(), ",") + " where " + id + "='" + ReflectUtil.getFieldValue(t, id) + "'");
+        return sql.toString();
+
+    }
+
+    public static <T> List<T> getBeans(ResultSet resultSet, Class<T> className) {
+        List<T> list = new ArrayList<T>();
+        Field[] fields = className.getDeclaredFields();
+        try {
+            while (resultSet.next()) {
+                T instance = className.newInstance();
+                for (Field field : fields) {
+                    Object result = null;
+                    try {
+                        result = resultSet.getObject(field.getName());
+                    } catch (SQLException e) {
+                        continue;
+                    }
+                    if (result instanceof Long) {
+                        result = Integer.parseInt(String.valueOf(result));
+                    }
+                    boolean flag = field.isAccessible();
+                    field.setAccessible(true);
+                    field.set(instance, result);
+                    field.setAccessible(flag);
+                }
+                list.add(instance);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

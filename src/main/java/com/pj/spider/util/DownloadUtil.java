@@ -1,6 +1,6 @@
 package com.pj.spider.util;
 
-import com.pj.spider.config.CommonConfig;
+import com.pj.spider.dispatch.DispatchConfig;
 import okhttp3.*;
 
 import java.io.IOException;
@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
  * 用于内部服务下载
  */
 public class DownloadUtil {
-    private static OkHttpClient.Builder builder;
     private static OkHttpClient client;
     public static volatile DownloadUtil instance;
 
@@ -28,9 +27,9 @@ public class DownloadUtil {
     }
 
     public DownloadUtil() {
-        builder = new OkHttpClient.Builder();
-        builder.connectionPool(new ConnectionPool(CommonConfig.connectionPool, CommonConfig.keepAlive, TimeUnit.SECONDS));
-        builder.connectTimeout(CommonConfig.connectionSocket, TimeUnit.SECONDS);
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.connectionPool(new ConnectionPool(Integer.parseInt(DispatchConfig.downloadOkhttp3ConnectionPool), Integer.parseInt(DispatchConfig.downloadOkhttp3KeepAlive), TimeUnit.SECONDS));
+        builder.connectTimeout(Integer.parseInt(DispatchConfig.downloadOkhttp3ConnectSocket), TimeUnit.SECONDS);
         client = builder.build();
     }
 

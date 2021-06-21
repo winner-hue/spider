@@ -32,6 +32,7 @@ java spider framework
     	(1, 1, 'https://www.csdn.net/', 0, 3600, '2021-06-20 21:11:06', 'test', '2021-06-20 20:11:06', NULL, '192.168.1.115', null, 'f9751de431104b125f48dd79cc55822a', 0, 0, 3600);
     	
 使用：
-    启动springboot SpiderApplication
+    启动springBootAdminApplication ,
+    再启动SpiderApplication
     再启动DispatchStart
     即可
